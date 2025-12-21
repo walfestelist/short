@@ -1,0 +1,67 @@
+Short Programming Language - is an ultra minimalistic programming language designed to help people understand how memory works under the hood, or just to challenge oneself to create complex algorithms from simple syntax and very few commands.
+
+By now, the language is not Turing complete, because that's a test version. Later functions and labels will be added, as same as pointers, which will allow you to basically make everything you want
+
+The syntax is simple, there are few basic constructions by now:
+1. <destination> <op> <source>
+2. <command> <argument>
+
+All the data is stored by vN variables, where N is any number from 0 to 64 bit maximum. Under the hood, variables are stored in the heap, with dynamic block allocations, so the memory is unlimited, it just depends on how much memory is available on a PC.
+Variables can't have names, for simplicity, it's just v0, v1, v2 and so on.
+Each variable weights exactly 8 bytes, but you can access single bytes by writing b0, b1, b2 etc.
+
+For example, if you write v0 = 0x11223344556677 (in hex), that means, that now:
+
+b0 is 0x11,
+b1 is 0x22,
+b3 is 0x33,
+b4 is 0x44,
+b5 is 0x55,
+b6 is 0x66,
+and b7 is 0x77
+
+It uses big-endian order independently from your architecture order
+
+While <destination> can be only vN and bN, <source> can either be vN/bN, or a literal.
+
+Literals can be numbers in many counting systems:
+
+42 - decimal
+0x2A - hexadecimal
+0o52 - octal
+0b101010 - binary
+
+And can be one-symbol literals (escaping supported):
+
+'A' - 65
+'\n' - 10
+'\e' - 27
+
+'' means 0
+
+There are many supported operators (for <op>), here are all of them:
+
+'+' - plus
+'-' - minus
+'*' - multiply
+'/' - divide
+'%' - remainder
+'^' - xor
+'&' - and
+'|' - or
+
+Here is the example of use:
+
+"v0 = 42" - setting v0 variable to 42
+"v0 + 3" - adding 3 to v0, now it's 45
+"v1 = 2" - setting v1 to 2
+"v0 * v1" - multiplying v0 by v1, saving the result in v0, now it's 95
+"v0 / v3" - oops, all variables are 0 by default, even if you didn't initialize them, so that's division by zero, which will throw a runtime error
+
+Also, there are two commands:
+
+'w' - writing a symbol from any value (if the value is bigger than 1 byte, it will be cutted by your system's byte order)
+'r' - reading a symbol from the user, and saving it in any adress given in the argument (maybe I will fix it later, because that's a bit unexpected that "r 'A'", for example, will save a symbol in b65)
+
+You can check the example in example.short file
+Now, at exactly 67th line, that's the end
