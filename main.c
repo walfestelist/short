@@ -7,9 +7,12 @@ int main(void) {
     init_mem();
 
     char *code =
-        "w 'F'\n"
-        "w 'E'\n"
+        "v1 = 42\n"
+        "v1 >> 3\n"
+        "w v1\n"
         ;
 
     run_code(code);
+
+    scanvars_mem(10);
 }

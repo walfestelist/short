@@ -42,15 +42,9 @@ void setvar_mem(size_t n, uint64_t value) {
     uint64_to_uint8_8(memory + byte_n, value);
 }
 
-void addbyte_mem(size_t n, uint8_t value) {
-    setbyte_mem(n, getbyte_mem(n) + value);
-}
-void subbyte_mem(size_t n, uint8_t value) {
-    setbyte_mem(n, getbyte_mem(n) - value);
-}
-void mulbyte_mem(size_t n, uint8_t value) {
-    setbyte_mem(n, getbyte_mem(n) * value);
-}
+void addbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) + value); }
+void subbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) - value); }
+void mulbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) * value); }
 void divbyte_mem(size_t n, uint8_t value) {
     if (value == 0) {
         printf_error("Division by zero");
@@ -58,21 +52,31 @@ void divbyte_mem(size_t n, uint8_t value) {
     setbyte_mem(n, getbyte_mem(n) / value);
 }
 
-void addvar_mem(size_t n, uint8_t value) {
-    setvar_mem(n, getvar_mem(n) + value);
-}
-void subvar_mem(size_t n, uint8_t value) {
-    setvar_mem(n, getvar_mem(n) - value);
-}
-void mulvar_mem(size_t n, uint8_t value) {
-    setvar_mem(n, getvar_mem(n) * value);
-}
-void divvar_mem(size_t n, uint8_t value) {
+void rembyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) % value); }
+
+void addvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) + value); }
+void subvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) - value); }
+void mulvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) * value); }
+void divvar_mem(size_t n, uint64_t value) {
     if (value == 0) {
         printf_error("Division by zero");
     }
     setvar_mem(n, getvar_mem(n) / value);
 }
+
+void remvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) % value); }
+
+void orbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) | value); }
+void xorbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) ^ value); }
+void andbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) & value); }
+void rightbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) >> value); }
+void leftbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) << value); }
+
+void orvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) | value); }
+void xorvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) ^ value); }
+void andvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) & value); }
+void rightvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) >> value); }
+void leftvar_mem(size_t n, uint64_t value) { setvar_mem(n, getvar_mem(n) << value); }
 
 void scanbytes_mem(size_t n) {
     for (size_t i = 0; i < n; i++) {

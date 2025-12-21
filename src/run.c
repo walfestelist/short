@@ -41,7 +41,7 @@ static char* status_to_str(Status status) {
     }
 }
 
-void run_node(Node *node) {
+static void run_node(Node *node) {
     if (node->type == NODE_ASSIGN_VAR) {
         switch (node->value.assign_var.op) {
             case '=': setvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
@@ -49,6 +49,12 @@ void run_node(Node *node) {
             case '-': subvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
             case '*': mulvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
             case '/': divvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
+            case '%': remvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
+            case '^': xorvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
+            case '&': andvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
+            case '|': orvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
+            case '>': rightvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
+            case '<': leftvar_mem(node->value.assign_var.var, node->value.assign_var.val); break;
         }
     } else if (node->type == NODE_ASSIGN_BYTE) {
         switch (node->value.assign_byte.op) {
@@ -57,6 +63,12 @@ void run_node(Node *node) {
             case '-': subbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
             case '*': mulbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
             case '/': divbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
+            case '%': rembyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
+            case '^': xorbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
+            case '&': andbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
+            case '|': orbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
+            case '>': rightbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
+            case '<': leftbyte_mem(node->value.assign_byte.var, node->value.assign_byte.val); break;
         }
     } else if (node->type == NODE_COMMAND) {
         char c;

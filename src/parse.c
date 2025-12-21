@@ -23,8 +23,18 @@ static inline uint64_t parse_num(const char *code, Status *status) {
 }
 
 static inline char parse_op(const char *code) {
-    if (code[pc] == '+' || code[pc] == '-' || code[pc] == '*' || code[pc] == '/' || code[pc] == '=') {
+    if (code[pc] == '+' || code[pc] == '-' || code[pc] == '*' || code[pc] == '/' || code[pc] == '=' || code[pc] == '%' || code[pc] == '^' || code[pc] == '&' || code[pc] == '|') {
         return code[pc++];
+    } else if (code[pc] != '\0') {
+        if (code[pc] == '>' && code[pc+1] == '>') {
+            pc += 2;
+            return '>';
+        } else if (code[pc] == '<' && code[pc+1] == '<') {
+            pc += 2;
+            return '<';
+        } else {
+            return 0;
+        }
     } else {
         return 0;
     }
