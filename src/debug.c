@@ -4,6 +4,8 @@
 
 #include "debug.h"
 
+extern char *src;
+
 void printf_error(const char *format, ...) {
     if (!format) return;
 
@@ -16,5 +18,6 @@ void printf_error(const char *format, ...) {
 
     va_end(args);
 
+    if (src) free(src);
     exit(EXIT_FAILURE);
 }

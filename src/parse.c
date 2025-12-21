@@ -1,7 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 #include "parse.h"
+#include "debug.h"
 #include "mem.h"
 #include "utils.h"
 
@@ -80,10 +82,32 @@ static inline uint64_t parse_lit(const char *code, Status *status) {
             return 0;
         }
 
-        lit = (uint64_t) code[pc]; // we just take the ASCII code of the current symbol, like 'A'
+        if (code[pc] != '\'' && code[pc] != '\\') {
+            lit = (uint64_t) code[pc]; // we just take the ASCII code of the current symbol, like 'A'
+            pc++;
+        } else if (code[pc] == '\'') {
+            lit = 0;
+        } else if (code[pc] == '\\') {
+            // imagining it was "\n'"
+            pc++;
 
-        pc++;
-        // Now it should point after the letter
+            // now code + pc is pointing to "n'"
+            // so, code[pc] == 'n'
+
+            switch (code[pc]) {
+                case 'n': lit = '\n'; break;
+                case '0': lit = '\0'; break;
+                case 'e': lit = '\x1b'; break;
+                case 't': lit = '\t'; break;
+                case 'b': lit = '\b'; break;
+                case '\'': lit = '\''; break;
+                default: printf_error("Unknown symbol after '\\': '%c'", code[pc]);
+            }
+
+            pc++;
+
+            // now it's pointing to "'"
+        }
 
         // We must check if the quote is closed
 
@@ -135,7 +159,7 @@ static inline uint64_t parse_val(const char *code, Status *status) {
 Node parse(const char *code, Status *status) {
     Node node;
 
-    while (code[pc] == ' ') pc++;
+    while (code[pc] == ' ' || code[pc] == '\n') pc++;
 
     if (code[pc] == 'v' || code[pc] == 'b') {
         char type = code[pc];
@@ -167,12 +191,10 @@ Node parse(const char *code, Status *status) {
 
         while (code[pc] == ' ') pc++;
 
-        if (code[pc] != '.' && code[pc] != '\n' && code[pc] == '\0') {
+        if (code[pc] != '.' && code[pc] != '\n' && code[pc] != '\0') {
             *status = STATUS_EXPECTED_ENDLINE;
             return node;
         }
-
-        pc++;
 
         if (type == 'v') {
             node.type = NODE_ASSIGN_VAR;
@@ -185,6 +207,7 @@ Node parse(const char *code, Status *status) {
             node.value.assign_byte.op = op;
             node.value.assign_byte.val = val;
         }
+        if (code[pc] != '\0') pc++;
     } else if (code[pc] == 'w' || code[pc] == 'r' || code[pc] == 'j' || code[pc] == 'c') {
         char cmd = code[pc];
 
@@ -200,16 +223,19 @@ Node parse(const char *code, Status *status) {
 
         while (code[pc] == ' ') pc++;
 
-        if (code[pc] != '.' && code[pc] != '\n' && code[pc] == '\0') {
+        if (code[pc] != '.' && code[pc] != '\n' && code[pc] != '\0') {
             *status = STATUS_EXPECTED_ENDLINE;
             return node;
         }
 
-        pc++;
+        if (code[pc] != '\0') pc++;
 
         node.type = NODE_COMMAND;
         node.value.command.cmd = cmd;
         node.value.command.arg = arg;
+    } else if (code[pc] == '\0') {
+        *status = STATUS_CONTINUE;
+        return node;
     }
 
     else {

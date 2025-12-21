@@ -93,8 +93,9 @@ Status run_code(const char *code) {
         Status status;
         Node node = parse(code, &status);
         if (status != STATUS_SUCCESS) {
-             printf_error("%s", status_to_str(status));
-             return status;
+            if (status == STATUS_CONTINUE) continue;
+            printf_error("%s at '%c' (code: %d, pos: %ld)", status_to_str(status), code[pc], code[pc], pc);
+            return status;
         }
         
         run_node(&node);
