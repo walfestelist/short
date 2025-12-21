@@ -1,0 +1,29 @@
+#ifndef MEM_H
+
+#define MEM_H
+
+#include <stddef.h>
+#include <stdint.h>
+
+#define BLOCK_SIZE 512
+
+void init_mem();
+uint8_t getbyte_mem(size_t n);
+void setbyte_mem(size_t n, uint8_t value);
+uint64_t getvar_mem(size_t n);
+void setvar_mem(size_t n, uint64_t value);
+
+void addbyte_mem(size_t n, uint8_t value);
+void subbyte_mem(size_t n, uint8_t value);
+void mulbyte_mem(size_t n, uint8_t value);
+void divbyte_mem(size_t n, uint8_t value);
+
+void addvar_mem(size_t n, uint8_t value);
+void subvar_mem(size_t n, uint8_t value);
+void mulvar_mem(size_t n, uint8_t value);
+void divvar_mem(size_t n, uint8_t value);
+
+void scanbytes_mem(size_t n);
+void scanvars_mem(size_t n);
+
+#endif
