@@ -37,7 +37,7 @@ uint64_t getvar_mem(size_t n) {
 void setvar_mem(size_t n, uint64_t value) {
     size_t byte_n = n * 8;
 
-    if (byte_n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, ((n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE);
+    if (byte_n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, ((byte_n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE);
 
     uint64_to_uint8_8(memory + byte_n, value);
 }

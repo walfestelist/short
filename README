@@ -8,7 +8,7 @@ The syntax is simple, there are few basic constructions by now:
 
 All the data is stored by vN variables, where N is any number from 0 to 64 bit maximum. Under the hood, variables are stored in the heap, with dynamic block allocations, so the memory is unlimited, it just depends on how much memory is available on a PC.
 Variables can't have names, for simplicity, it's just v0, v1, v2 and so on.
-Each variable weights exactly 8 bytes, but you can access single bytes by writing b0, b1, b2 etc.
+Each variable is exactly 8 bytes in size, but you can access single bytes by writing b0, b1, b2 etc.
 
 For example, if you write v0 = 0x11223344556677 (in hex), that means, that now:
 
