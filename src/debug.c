@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -5,6 +6,7 @@
 #include "debug.h"
 
 extern char *src;
+extern uint8_t *memory;
 
 void printf_error(const char *format, ...) {
     if (!format) return;
@@ -19,5 +21,6 @@ void printf_error(const char *format, ...) {
     va_end(args);
 
     if (src) free(src);
+    if (memory) free(memory);
     exit(EXIT_FAILURE);
 }

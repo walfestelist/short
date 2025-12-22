@@ -44,4 +44,8 @@ info:
 	@echo "Object files:"
 	@echo $(OBJS)
 
+install:
+	@sudo cp $(EXEC) /usr/local/bin/$(EXEC)
+	@echo "Installed at /usr/local/bin/$(EXEC)"
+
 .PHONY: all clean run debug info
