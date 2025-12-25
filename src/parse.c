@@ -9,6 +9,10 @@
 
 extern uint64_t pc;
 
+static inline int is_endline(char c) {
+    return c == '.' || c == '\n' || c == '\0';
+}
+
 static inline uint64_t parse_num(const char *code, Status *status) {
     char *endptr;
     uint64_t num = (uint64_t) strtoull(code + pc, &endptr, 10);
@@ -156,10 +160,43 @@ static inline uint64_t parse_val(const char *code, Status *status) {
     }
 }
 
+void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
+    for (pc = 0; code[pc] != '\0'; pc++) {
+        if (code[pc] == 'j') {
+            pc++;
+            
+            while (pc == ' ') pc++;
+
+            if (code[pc] == 'l') pc++;
+        } else if (code[pc] == 'l') {
+            pc++;
+            uint64_t num = parse_num(code, status);
+            if (*status != STATUS_SUCCESS) {
+                break;
+            }
+
+            while (code[pc] == ' ') pc++;
+
+            if (!is_endline(code[pc])) {
+                *status = STATUS_EXPECTED_ENDLINE;
+                break;
+            }
+
+            if (code[pc] != '\0') pc++;
+
+            set_label_addr(num, pc);
+            printf("Label %ld was set at %zu", num, pc);
+        }
+    }
+    
+    pc = 0;
+    return;
+}
+
 Node parse(const char *code, Status *status) {
     Node node;
 
-    while (code[pc] == ' ' || code[pc] == '\n') pc++;
+    while (code[pc] == ' ' || code[pc] == '\n' || code[pc] == '\t') pc++;
 
     if (code[pc] == 'v' || code[pc] == 'b') {
         char type = code[pc];
@@ -191,7 +228,7 @@ Node parse(const char *code, Status *status) {
 
         while (code[pc] == ' ') pc++;
 
-        if (code[pc] != '.' && code[pc] != '\n' && code[pc] != '\0') {
+        if (!is_endline(code[pc])) {
             *status = STATUS_EXPECTED_ENDLINE;
             return node;
         }
@@ -208,7 +245,7 @@ Node parse(const char *code, Status *status) {
             node.value.assign_byte.val = val;
         }
         if (code[pc] != '\0') pc++;
-    } else if (code[pc] == 'w' || code[pc] == 'r' || code[pc] == 'j' || code[pc] == 'c') {
+    } else if (code[pc] == 'w' || code[pc] == 'r') {
         char cmd = code[pc];
 
         pc++;
@@ -223,7 +260,7 @@ Node parse(const char *code, Status *status) {
 
         while (code[pc] == ' ') pc++;
 
-        if (code[pc] != '.' && code[pc] != '\n' && code[pc] != '\0') {
+        if (!is_endline(code[pc])) {
             *status = STATUS_EXPECTED_ENDLINE;
             return node;
         }
@@ -233,9 +270,62 @@ Node parse(const char *code, Status *status) {
         node.type = NODE_COMMAND;
         node.value.command.cmd = cmd;
         node.value.command.arg = arg;
+    } else if (code[pc] == 'j') {
+        // imagining the line is "j l42"
+        pc++;
+
+        // now it's " l42"
+
+        while (code[pc] == ' ') pc++;
+
+        // now just "l42"
+
+        if (code[pc] != 'l') {
+            *status = STATUS_EXPECTED_LABEL;
+            return node;
+        }
+
+        pc++;
+
+        // now only a number left - "42"
+
+        uint64_t num = parse_num(code, status);
+
+        if (*status != STATUS_SUCCESS) {
+            return node;
+        }
+
+        if (!is_endline(code[pc])) {
+            *status = STATUS_EXPECTED_ENDLINE;
+            return node;
+        }
+
+        if (code[pc] != '\0') pc++;
+
+        node.type = NODE_COMMAND;
+        node.value.command.cmd = 'j';
+        node.value.command.arg = num;
     } else if (code[pc] == '\0') {
         *status = STATUS_CONTINUE;
         return node;
+    } else if (code[pc] == 'l') {
+        pc++;
+        uint64_t num = parse_num(code, status);
+
+        if (*status != STATUS_SUCCESS) {
+            return node;
+        }
+
+        while (code[pc] == ' ') pc++;
+
+        if (!is_endline(code[pc])) {
+            *status = STATUS_EXPECTED_ENDLINE;
+            return node;
+        }
+
+        if (code[pc] != '\0') pc++;
+        
+        node.type = NODE_LABEL;
     }
 
     else {

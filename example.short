@@ -1,12 +1,8 @@
-w 'H'
-w 'e'
-w 'l'
-w 'l'
-w 'o'
-w ' '
-w 'w'
-w 'o'
-w 'r'
-w 'l'
-w 'd'
-w '\n'
+l1
+
+w 'F'
+j l42
+w 'A'
+
+l42
+w 'E'

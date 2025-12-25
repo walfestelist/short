@@ -5,22 +5,7 @@
 #include "mem.h"
 
 uint64_t pc = 0;
-/*
-    STATUS_SUCCESS,
-
-    STATUS_EXPECTED_NUM,
-    STATUS_EXPECTED_OP,
-    STATUS_EXPECTED_VAL,
-    STATUS_EXPECTED_LIT_CONT,
-    STATUS_EXPECTED_QUOTE,
-    STATUS_EXPECTED_ENDLINE,
-
-    STATUS_UNEXPECTED_SYMBOL,
-
-    STATUS_UNKNOWN_LIT,
-
-    STATUS_DIVISION_BY_ZERO
-*/
+extern uint64_t *label_memory;
 
 static char* status_to_str(Status status) {
     switch (status) {
@@ -80,21 +65,29 @@ static void run_node(Node *node) {
                 c = getchar();
                 setbyte_mem(node->value.command.arg, c);
                 break;
+            case 'j':
+                pc = get_label_addr(node->value.command.arg);
+                // printf("Jumping to %zu from %zu\n", pc, node->value.command.arg);
+                break;
             default:
                 printf_error("Command is unsupported yet: '%c'", node->value.command.cmd);
         }
+    } else if (node->type == NODE_LABEL) {
+        // NOTHING
     }
 }
 
 Status run_code(const char *code) {
     if (!code) printf_error("Failed to get the code while running");
 
+    Status status;
+    parse_labels(code, label_memory, &status);
+
     for (; code[pc] != '\0' ;) {
-        Status status;
         Node node = parse(code, &status);
         if (status != STATUS_SUCCESS) {
             if (status == STATUS_CONTINUE) continue;
-            printf_error("%s at '%c' (code: %d, pos: %ld)", status_to_str(status), code[pc], code[pc], pc);
+            printf_error("%s at '%c' (code: %d, pc: %ld)", status_to_str(status), code[pc], code[pc], pc);
             return status;
         }
         

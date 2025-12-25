@@ -29,7 +29,7 @@ $(OBJ_DIR):
 
 run: $(EXEC)
 	@clear
-	@./$(EXEC)
+	@./$(EXEC) example.short
 
 clean:
 	@rm -rf $(OBJ_DIR) $(EXEC)

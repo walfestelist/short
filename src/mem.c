@@ -7,10 +7,14 @@
 
 uint8_t *memory;
 size_t mem_alloced = 0;
+uint64_t *label_memory;
+size_t label_mem_alloced = 0;
 
 void init_mem() {
     memory = safe_calloc(BLOCK_SIZE);
     mem_alloced = BLOCK_SIZE;
+    label_memory = safe_calloc(BLOCK_SIZE);
+    label_mem_alloced = BLOCK_SIZE / 8;
     // printf("Memory initialized with block size %d\n", BLOCK_SIZE);
 }
 
@@ -20,7 +24,9 @@ uint8_t getbyte_mem(size_t n) {
 }
 
 void setbyte_mem(size_t n, uint8_t value) {
-    if (n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, ((n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE);
+    size_t new_size = ((n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
+    if (n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, new_size);
+    mem_alloced = new_size;
 
     memory[n] = value;
 }
@@ -36,10 +42,25 @@ uint64_t getvar_mem(size_t n) {
 
 void setvar_mem(size_t n, uint64_t value) {
     size_t byte_n = n * 8;
+    size_t new_size = ((byte_n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
 
-    if (byte_n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, ((byte_n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE);
+    if (byte_n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, new_size);
+    mem_alloced = new_size;
 
     uint64_to_uint8_8(memory + byte_n, value);
+}
+
+uint64_t get_label_addr(uint64_t num) {
+    if (num >= label_mem_alloced) return 0;
+    return label_memory[num];
+}
+
+void set_label_addr(uint64_t num, uint64_t value) {
+    size_t new_size = ((num + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
+    if (num >= label_mem_alloced) label_memory = safe_recalloc(label_memory, label_mem_alloced, new_size);
+    label_mem_alloced = new_size / 8;
+
+    label_memory[num] = value;
 }
 
 void addbyte_mem(size_t n, uint8_t value) { setbyte_mem(n, getbyte_mem(n) + value); }
@@ -87,5 +108,11 @@ void scanbytes_mem(size_t n) {
 void scanvars_mem(size_t n) {
     for (size_t i = 0; i < n; i++) {
         printf("[v%zu]: 0x%02lX\n", i, getvar_mem(i));
+    }
+}
+
+void scanlabels(size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        printf("[l%zu]: 0x%02lX\n", i, get_label_addr(i));
     }
 }

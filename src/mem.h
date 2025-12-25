@@ -13,6 +13,9 @@ void setbyte_mem(size_t n, uint8_t value);
 uint64_t getvar_mem(size_t n);
 void setvar_mem(size_t n, uint64_t value);
 
+uint64_t get_label_addr(uint64_t num);
+void set_label_addr(uint64_t num, uint64_t value);
+
 void addbyte_mem(size_t n, uint8_t value);
 void subbyte_mem(size_t n, uint8_t value);
 void mulbyte_mem(size_t n, uint8_t value);
@@ -39,5 +42,6 @@ void leftvar_mem(size_t n, uint64_t value);
 
 void scanbytes_mem(size_t n);
 void scanvars_mem(size_t n);
+void scanlabels(size_t n);
 
 #endif
