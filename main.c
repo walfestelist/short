@@ -7,7 +7,7 @@
 #include "src/mem.h"
 #include "src/debug.h"
 
-const static double version = 0.01;
+const static double version = 0.02;
 
 extern uint64_t pc;
 

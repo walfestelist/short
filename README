@@ -63,5 +63,17 @@ Also, there are two commands:
 'w' - writing a symbol from any value (if the value is bigger than 1 byte, it will be cutted by your system's byte order)
 'r' - reading a symbol from the user, and saving it in any adress given in the argument (maybe I will fix it later, because that's a bit unexpected that "r 'A'", for example, will save a symbol in b65)
 
+In 0.02 version also labels were added. Now, to define a label, just type lN, where N is a number from 0 to max 64 bit value.
+To jump to a label without conditions, just type 'j' and then lN.
+
+For example:
+l0
+w 'H'
+j l123
+w 'w' - this won't be executed as before it we went to l123
+
+l123
+
+w 'i'
+
 You can check the example in example.short file
-Now, at exactly 67th line, that's the end
