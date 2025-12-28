@@ -28,7 +28,8 @@ typedef enum {
     NODE_ASSIGN_VAR,
     NODE_ASSIGN_BYTE,
     NODE_COMMAND,
-    NODE_LABEL
+    NODE_LABEL,
+    NODE_CONDJMP
 } NodeType;
 
 typedef struct {
@@ -59,13 +60,18 @@ typedef struct {
 } LabelNode;
 
 typedef struct {
+    char *op;
+    uint64_t label;
+} CondJmpNode;
+
+typedef struct {
     NodeType type;
     union {
         AssignVarNode assign_var;
         AssignByteNode assign_byte;
         CommandNode command;
         LabelNode label;
-        CondJumpNode cond_jump;
+        CondJmpNode condjmp;
     } value;
 } Node;
 

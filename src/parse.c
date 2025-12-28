@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "parse.h"
 #include "debug.h"
@@ -29,7 +30,7 @@ static inline uint64_t parse_num(const char *code, Status *status) {
 }
 
 static inline char parse_op(const char *code) {
-    if (code[pc] == '+' || code[pc] == '-' || code[pc] == '*' || code[pc] == '/' || code[pc] == '=' || code[pc] == '%' || code[pc] == '^' || code[pc] == '&' || code[pc] == '|') {
+    if (code[pc] == '+' || code[pc] == '-' || code[pc] == '*' || code[pc] == '/' || code[pc] == '=' || code[pc] == '%' || code[pc] == '^' || code[pc] == '&' || code[pc] == '|' || code[pc] == '?') {
         return code[pc++];
     } else if (code[pc] != '\0') {
         if (code[pc] == '>' && code[pc+1] == '>') {
@@ -44,6 +45,25 @@ static inline char parse_op(const char *code) {
     } else {
         return 0;
     }
+}
+
+static inline char* parse_cond_op(const char *code) {
+    if (code[pc] == '\0') return 0;
+
+    char *op = "";
+
+    if (code[pc+1] == '=') {
+        if (code[pc] == '=') op = "==";
+        else if (code[pc] == '>') op = ">=";
+        else if (code[pc] == '<') op = "<=";
+    } else {
+        if (code[pc] == '!') op = "!";
+        else if (code[pc] == '>') op = ">";
+        else if (code[pc] == '<') op = "<";
+    }
+
+    pc += strlen(op);
+    return op;
 }
 
 static inline uint64_t parse_lit(const char *code, Status *status) {
@@ -165,10 +185,18 @@ void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
         if (code[pc] == 'j') {
             pc++;
             
-            while (pc == ' ') pc++;
+            while (code[pc] == ' ') pc++;
+
+            // printf("Now code[pc] is: %c\n", code[pc]);
+            if (code[pc] == 'l') pc++;
+        } else if (code[pc] == 'i') {
+            pc++;
+
+            while (code[pc] == ' ' || code[pc] == '=' || code[pc] == '!' || code[pc] == '>' || code[pc] == '<') pc++;
 
             if (code[pc] == 'l') pc++;
-        } else if (code[pc] == 'l') {
+        }
+        else if (code[pc] == 'l') {
             pc++;
             uint64_t num = parse_num(code, status);
             if (*status != STATUS_SUCCESS) {
@@ -185,7 +213,7 @@ void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
             if (code[pc] != '\0') pc++;
 
             set_label_addr(num, pc);
-            printf("Label %ld was set at %zu", num, pc);
+            // printf("l%zu was set at %zu\n", num, pc);
         }
     }
     
@@ -305,9 +333,6 @@ Node parse(const char *code, Status *status) {
         node.type = NODE_COMMAND;
         node.value.command.cmd = 'j';
         node.value.command.arg = num;
-    } else if (code[pc] == '\0') {
-        *status = STATUS_CONTINUE;
-        return node;
     } else if (code[pc] == 'l') {
         pc++;
         uint64_t num = parse_num(code, status);
@@ -326,9 +351,47 @@ Node parse(const char *code, Status *status) {
         if (code[pc] != '\0') pc++;
         
         node.type = NODE_LABEL;
+    } else if (code[pc] == 'i') {
+        pc++;
+
+        while (code[pc] == ' ') pc++;
+
+        char *op = parse_cond_op(code);
+
+        if (*op == '\0') {
+            *status = STATUS_EXPECTED_OP;
+            return node;
+        }
+
+        while (code[pc] == ' ') pc++;
+
+        if (code[pc] != 'l') {
+            *status = STATUS_EXPECTED_LABEL;
+            return node;
+        }
+
+        pc++;
+
+        uint64_t num = parse_num(code, status);
+
+        if (*status != STATUS_SUCCESS) return node;
+
+        while (code[pc] == ' ') pc++;
+
+        if (!is_endline(code[pc])) {
+            *status = STATUS_EXPECTED_ENDLINE;
+            return node;
+        }
+
+        node.type = NODE_CONDJMP;
+        node.value.condjmp.op = op;
+        node.value.condjmp.label = num;
     }
 
-    else {
+    else if (code[pc] == '\0') {
+        *status = STATUS_CONTINUE;
+        return node;
+    } else {
         *status = STATUS_UNEXPECTED_SYMBOL;
         // printf("The wrong symbol is: %c\n", code[pc]);
         return node;

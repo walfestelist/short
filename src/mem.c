@@ -25,8 +25,10 @@ uint8_t getbyte_mem(size_t n) {
 
 void setbyte_mem(size_t n, uint8_t value) {
     size_t new_size = ((n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
-    if (n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, new_size);
-    mem_alloced = new_size;
+    if (n >= mem_alloced) {
+        memory = safe_recalloc(memory, mem_alloced, new_size);
+        mem_alloced = new_size;
+    }
 
     memory[n] = value;
 }
@@ -44,8 +46,10 @@ void setvar_mem(size_t n, uint64_t value) {
     size_t byte_n = n * 8;
     size_t new_size = ((byte_n + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
 
-    if (byte_n >= mem_alloced) memory = safe_recalloc(memory, mem_alloced, new_size);
-    mem_alloced = new_size;
+    if (byte_n >= mem_alloced) {
+        memory = safe_recalloc(memory, mem_alloced, new_size);
+        mem_alloced = new_size;
+    }
 
     uint64_to_uint8_8(memory + byte_n, value);
 }
@@ -57,8 +61,10 @@ uint64_t get_label_addr(uint64_t num) {
 
 void set_label_addr(uint64_t num, uint64_t value) {
     size_t new_size = ((num + BLOCK_SIZE - 1) / BLOCK_SIZE) * BLOCK_SIZE;
-    if (num >= label_mem_alloced) label_memory = safe_recalloc(label_memory, label_mem_alloced, new_size);
-    label_mem_alloced = new_size / 8;
+    if (num >= label_mem_alloced) {
+        label_memory = safe_recalloc(label_memory, label_mem_alloced, new_size);
+        label_mem_alloced = new_size / 8;
+    }
 
     label_memory[num] = value;
 }

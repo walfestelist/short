@@ -45,6 +45,7 @@ info:
 	@echo $(OBJS)
 
 install:
+	@sudo rm /usr/local/bin/$(EXEC)
 	@sudo cp $(EXEC) /usr/local/bin/$(EXEC)
 	@echo "Installed at /usr/local/bin/$(EXEC)"
 
