@@ -15,13 +15,13 @@ void* safe_recalloc(void *ptr, size_t old_size, size_t new_size) {
 
 void* safe_malloc(size_t size) {
     void *ptr = malloc(size);
-    if (!ptr) printf_error("Not enough memory to allocate %zu", size);
+    if (!ptr) printf_error("Not enough memory to allocate %zu bytes", size);
     return ptr;
 }
 
 void* safe_calloc(size_t size) {
     void *ptr = calloc(size, 1);
-    if (!ptr) printf_error("Not enough memory to allocate %zu", size);
+    if (!ptr) printf_error("Not enough memory to allocate %zu bytes", size);
     return ptr;
 }
 
@@ -29,7 +29,7 @@ void* safe_realloc(void *ptr, size_t size) {
     if (!ptr) return NULL;
 
     void *new_ptr = realloc(ptr, size);
-    if (!new_ptr) printf_error("Not enough memory to allocate %zu", size);
+    if (!new_ptr) printf_error("Not enough memory to allocate %zu bytes", size);
 
     return new_ptr;
 }

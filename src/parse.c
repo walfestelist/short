@@ -136,7 +136,7 @@ static inline uint64_t parse_lit(const char *code, Status *status) {
         // We must check if the quote is closed
 
         if (code[pc] != '\'') {
-            *status = STATUS_EXPECTED_LIT_CONT;
+            *status = STATUS_EXPECTED_QUOTE_CLOSE;
             return 0;
         }
         
@@ -151,7 +151,7 @@ static inline uint64_t parse_lit(const char *code, Status *status) {
         return 0;
     }
      
-    pc += endptr - (code + pc); // if we didn't use strtoull(), endptr is equal to code, so it's basically pc += 0
+    pc += endptr - (code + pc); // if we didn't use strtoull(), endptr is equal to code + pc, so it's basically pc += 0
     
     *status = STATUS_SUCCESS;
     return lit;
@@ -163,13 +163,28 @@ static inline uint64_t parse_val(const char *code, Status *status) {
         pc++;
 
         uint64_t num = parse_num(code, status);
-        if (*status != STATUS_SUCCESS) {
-            return 0;
-        }
+        if (*status != STATUS_SUCCESS) return 0;
 
         if (type == 'v') return getvar_mem(num);
         else return getbyte_mem(num);
-    } else {
+    } else if (code[pc] == '[' || code[pc] == '{') {
+        char type = code[pc];
+
+        pc++;
+
+        uint64_t addr = parse_val(code, status);
+        if (*status != STATUS_SUCCESS) return 0;
+        
+        if (code[pc] != '}' && code[pc] != ']') {
+            *status = STATUS_EXPECTED_CLOSING_BRACKET;
+            return 0;
+        }
+
+        pc++;
+
+        if (type == '[') return getbyte_mem(addr);
+        else return getvar_mem(addr);
+    } else if (code[pc] == '\'' || isdigit(code[pc])) {
         uint64_t lit = parse_lit(code, status);
 
         if (*status != STATUS_SUCCESS) {
@@ -177,6 +192,9 @@ static inline uint64_t parse_val(const char *code, Status *status) {
         }
 
         return lit;
+    } else {
+        *status = STATUS_EXPECTED_VAL;
+        return 0;
     }
 }
 
@@ -386,8 +404,7 @@ Node parse(const char *code, Status *status) {
         node.type = NODE_CONDJMP;
         node.value.condjmp.op = op;
         node.value.condjmp.label = num;
-    }
-
+    } 
     else if (code[pc] == '\0') {
         *status = STATUS_CONTINUE;
         return node;

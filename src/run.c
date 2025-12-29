@@ -27,15 +27,41 @@ static void print_flags() {
     printf("Equals/Less: %d\n", flag_eq_less);
 }
 
+/*
+    STATUS_SUCCESS,
+
+    STATUS_CONTINUE,
+
+    STATUS_EXPECTED_NUM,
+    STATUS_EXPECTED_OP,
+    STATUS_EXPECTED_VAL,
+    STATUS_EXPECTED_LIT_CONT,
+    STATUS_EXPECTED_QUOTE,
+    STATUS_EXPECTED_QUOTE_CLOSE,
+    STATUS_EXPECTED_ENDLINE,
+    STATUS_EXPECTED_LABEL,
+    STATUS_EXPECTED_CLOSING_BRACKET,
+
+    STATUS_UNEXPECTED_SYMBOL,
+
+    STATUS_UNKNOWN_LIT,
+
+    STATUS_DIVISION_BY_ZERO
+*/
+
+
 static char* status_to_str(Status status) {
     switch (status) {
         case STATUS_SUCCESS: return "";
-        case STATUS_EXPECTED_NUM: return "Expected variable number";
+        case STATUS_EXPECTED_NUM: return "Expected number";
         case STATUS_EXPECTED_OP: return "Expected op";
         case STATUS_EXPECTED_VAL: return "Expected value";
         case STATUS_EXPECTED_LIT_CONT: return "Expected literal to continue";
         case STATUS_EXPECTED_QUOTE: return "Expected a quote";
+        case STATUS_EXPECTED_QUOTE_CLOSE: return "Expected a quote to close";
         case STATUS_EXPECTED_ENDLINE: return "Expected the end of line";
+        case STATUS_EXPECTED_LABEL: return "Expected label";
+        case STATUS_EXPECTED_CLOSING_BRACKET: return "Expected closing bracket";
 
         case STATUS_UNEXPECTED_SYMBOL: return "Unexpected symbol";
 
@@ -147,7 +173,7 @@ Status run_code(const char *code) {
         Node node = parse(code, &status);
         if (status != STATUS_SUCCESS) {
             if (status == STATUS_CONTINUE) continue;
-            printf_error("%s at '%c' (code: %d, pc: %ld)", status_to_str(status), code[pc], code[pc], pc);
+            printf_error("%s at '%c' (ASCII: %d, PC: %ld)", status_to_str(status), code[pc], code[pc], pc);
             return status;
         }
         
