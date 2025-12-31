@@ -6,6 +6,27 @@
 #include "parse.h"
 #include "mem.h"
 
+#ifdef _WIN32
+    #include <conio.h>
+    #define inst_getchar() _getch()
+#else
+    #include <termios.h>
+    #include <unistd.h>
+
+    static int inited = 0;
+    
+    static inline int inst_getchar() {
+        if (!inited) {
+            struct termios t;
+            tcgetattr(STDIN_FILENO, &t);
+            t.c_lflag &= ~(ICANON | ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &t);
+            inited = 1;
+        } return getchar();
+    }
+
+#endif
+
 uint64_t pc = 0;
 extern uint64_t *label_memory;
 
@@ -130,12 +151,12 @@ static void run_node(Node *node) {
                 putchar(node->value.command.arg);
                 break;
             case 'r':
-                c = getchar();
+                c = inst_getchar();
                 setbyte_mem(node->value.command.arg, c);
                 break;
             case 'j':
                 pc = get_label_addr(node->value.command.arg);
-                // printf("Jumping to %zu from %zu\n", pc, node->value.command.arg);
+                printf("Jumping to %zu from l%zu\n", pc, node->value.command.arg);
                 break;
             default:
                 printf_error("Command is unsupported yet: '%c'", node->value.command.cmd);
@@ -162,7 +183,7 @@ static void run_node(Node *node) {
     }
 }
 
-Status run_code(const char *code) {
+void run_code(const char *code) {
     if (!code) printf_error("Failed to get the code while running");
 
     Status status;
@@ -174,11 +195,9 @@ Status run_code(const char *code) {
         if (status != STATUS_SUCCESS) {
             if (status == STATUS_CONTINUE) continue;
             printf_error("%s at '%c' (ASCII: %d, PC: %ld)", status_to_str(status), code[pc], code[pc], pc);
-            return status;
+            return;
         }
         
         run_node(&node);
     }
-
-    return STATUS_SUCCESS;
 }

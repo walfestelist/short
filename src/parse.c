@@ -199,7 +199,7 @@ static inline uint64_t parse_val(const char *code, Status *status) {
 }
 
 void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
-    for (pc = 0; code[pc] != '\0'; pc++) {
+    for (pc = 0; code[pc] != '\0';) {
         if (code[pc] == 'j') {
             pc++;
             
@@ -216,12 +216,14 @@ void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
         }
         else if (code[pc] == 'l') {
             pc++;
+            // printf("After 'l' PC is %zu at '%c'\n", pc, code[pc]);
             uint64_t num = parse_num(code, status);
             if (*status != STATUS_SUCCESS) {
                 break;
             }
 
             while (code[pc] == ' ') pc++;
+            // printf("After spaces PC is %zu at '%c'\n", pc, code[pc]);
 
             if (!is_endline(code[pc])) {
                 *status = STATUS_EXPECTED_ENDLINE;
@@ -229,6 +231,7 @@ void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
             }
 
             if (code[pc] != '\0') pc++;
+            // printf("After endline PC is %zu at '%c'\n", pc, code[pc]);
 
             set_label_addr(num, pc);
             // printf("l%zu was set at %zu\n", num, pc);

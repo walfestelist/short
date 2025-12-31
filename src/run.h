@@ -4,6 +4,6 @@
 
 #include "parse.h"
 
-Status run_code(const char *code);
+void run_code(const char *code);
 
 #endif
