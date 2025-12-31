@@ -156,7 +156,7 @@ static void run_node(Node *node) {
                 break;
             case 'j':
                 pc = get_label_addr(node->value.command.arg);
-                printf("Jumping to %zu from l%zu\n", pc, node->value.command.arg);
+                // printf("Jumping to %zu from l%zu\n", pc, node->value.command.arg);
                 break;
             default:
                 printf_error("Command is unsupported yet: '%c'", node->value.command.cmd);

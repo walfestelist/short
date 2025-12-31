@@ -235,6 +235,8 @@ void parse_labels(const char *code, uint64_t *label_memory, Status *status) {
 
             set_label_addr(num, pc);
             // printf("l%zu was set at %zu\n", num, pc);
+        } else {
+            pc++;
         }
     }
     
