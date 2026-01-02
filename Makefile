@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -O2
-LDFLAGS = 
+CFLAGS = -O2 -std=c23
+LDFLAGS =
 
 SRC_DIR = src
 OBJ_DIR = obj

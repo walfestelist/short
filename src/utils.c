@@ -44,6 +44,36 @@ uint64_t uint8_8_to_uint64(uint8_t bytes[8]) {
     return value;
 }
 
+uint32_t uint8_4_to_uint32(uint8_t bytes[4]) {
+    uint32_t value = 0;
+
+    for (int i = 0; i < 4; i++) {
+        value = (value << 8) | bytes[i];
+    }
+
+    return value;
+}
+
+uint32_t uint8_3_to_uint24(uint8_t bytes[3]) {
+    uint32_t value = 0;
+
+    for (int i = 0; i < 3; i++) {
+        value = (value << 8) | bytes[i];
+    }
+
+    return value;
+}
+
+uint16_t uint8_2_to_uint16(uint8_t bytes[2]) {
+    uint16_t value = 0;
+
+    for (int i = 0; i < 2; i++) {
+        value = (value << 8) | bytes[i];
+    }
+
+    return value;
+}
+
 void uint64_to_uint8_8(uint8_t bytes[8], uint64_t num) {
     for (int i = 0; i < 8; i++) {
         bytes[i] = (uint8_t)(num >> (8 * (7 - i)));
@@ -63,4 +93,12 @@ int isdigit_in_bin(char c) {
 
 int isdigit_in_oct(char c) {
     return c >= '0' && c <= '7';
+}
+
+int utf8_char_len(uint8_t first_byte) {
+    if ((first_byte & 0x80) == 0x00) return 1;
+    if ((first_byte & 0xE0) == 0xC0) return 2;
+    if ((first_byte & 0xF0) == 0xE0) return 3;
+    if ((first_byte & 0xF8) == 0xF0) return 4;
+    return 0;
 }

@@ -2,22 +2,18 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "src/mem.h"
 #include "src/read.h"
 #include "src/run.h"
-#include "src/mem.h"
 #include "src/debug.h"
+#include "src/vm.h"
 
 const static double version = 0.02;
-
-extern uint64_t pc;
 
 char *src = NULL;
 
 int main(int argc, char **argv) {
-    init_mem();
-
     int version_asked = 0;
-
     char *filename = NULL;
 
     for (int i = 1; i < argc; i++) {
@@ -32,10 +28,12 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (!filename) printf_error("File was not mentioned");
-
     src = read_file(filename);
-    run_code(src);
+    if (!filename) printf_error("File was not mentioned");
+    ShortVM vm = init_vm(src);
+
+    run_code(&vm);
+    // scanbytes_mem(100, &vm);
 
     free(src);
 }

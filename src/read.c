@@ -13,7 +13,7 @@ char* read_file(const char *filename) {
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char *data = malloc(file_size + 1);
+    char *data = safe_malloc(file_size + 1);
     if (!data) {
         fclose(file);
         printf_error("Not enough memory to allocate %zu", file_size + 1);

@@ -27,25 +27,23 @@
 
 #endif
 
-uint64_t pc = 0;
-extern uint64_t *label_memory;
+static inline void putuint32(uint32_t num) {
+    uint8_t bytes[4] = {
+        (uint8_t)((num >> 16) & 0xFF),
+        (uint8_t)((num >> 8) & 0xFF),
+        (uint8_t)(num & 0xFF)
+    };
 
-char
-    flag_equal = 0,
-    flag_noteq = 0,
-    flag_bigger = 0,
-    flag_less = 0,
-    flag_eq_bigger = 0,
-    flag_eq_less = 0
-;
+    fwrite(bytes, 1, 4, stdout);
+}
 
-static void print_flags() {
-    printf("Equal: %d\n", flag_equal);
-    printf("Not equal: %d\n", flag_noteq);
-    printf("Bigger: %d\n", flag_bigger);
-    printf("Less: %d\n", flag_bigger);
-    printf("Equals/Bigger: %d\n", flag_eq_bigger);
-    printf("Equals/Less: %d\n", flag_eq_less);
+static void print_flags(ShortVM *vm) {
+    printf("Equal: %d\n", vm->fl_equal);
+    printf("Not equal: %d\n", vm->fl_not_equal);
+    printf("Bigger: %d\n", vm->fl_bigger);
+    printf("Less: %d\n", vm->fl_less);
+    printf("Equals/Bigger: %d\n", vm->fl_eq_bigger);
+    printf("Equals/Less: %d\n", vm->fl_less);
 }
 
 /*
@@ -77,127 +75,137 @@ static char* status_to_str(Status status) {
         case STATUS_EXPECTED_NUM: return "Expected number";
         case STATUS_EXPECTED_OP: return "Expected op";
         case STATUS_EXPECTED_VAL: return "Expected value";
+        case STATUS_EXPECTED_VAR: return "Expected variable";
         case STATUS_EXPECTED_LIT_CONT: return "Expected literal to continue";
         case STATUS_EXPECTED_QUOTE: return "Expected a quote";
         case STATUS_EXPECTED_QUOTE_CLOSE: return "Expected a quote to close";
         case STATUS_EXPECTED_ENDLINE: return "Expected the end of line";
         case STATUS_EXPECTED_LABEL: return "Expected label";
         case STATUS_EXPECTED_CLOSING_BRACKET: return "Expected closing bracket";
+        case STATUS_EXPECTED_COMMENT_END: return "Expected comment end";
 
         case STATUS_UNEXPECTED_SYMBOL: return "Unexpected symbol";
 
         case STATUS_UNKNOWN_LIT: return "Unknown literal";
+
+        case STATUS_INVALID_SYMBOL: return "Invalid symbol";
         
         case STATUS_DIVISION_BY_ZERO: return "Division by zero";
         default: return "[Unknown error]";
     }
 }
 
-static void run_node(Node *node) {
+static void run_node(Node *node, ShortVM *vm) {
     if (node->type == NODE_ASSIGN_VAR) {
         uint64_t var = node->value.assign_var.var;
-        uint64_t var_val = getvar_mem(node->value.assign_var.var);
+        uint64_t var_val = getvar_mem(node->value.assign_var.var, vm);
         uint64_t val = node->value.assign_var.val;
         switch (node->value.assign_var.op) {
-            case '=': setvar_mem(var, val); break;
-            case '+': addvar_mem(var, val); break;
-            case '-': subvar_mem(var, val); break;
-            case '*': mulvar_mem(var, val); break;
-            case '/': divvar_mem(var, val); break;
-            case '%': remvar_mem(var, val); break;
-            case '^': xorvar_mem(var, val); break;
-            case '&': andvar_mem(var, val); break;
-            case '|': orvar_mem(var, val); break;
-            case '>': rightvar_mem(var, val); break;
-            case '<': leftvar_mem(var, val); break;
+            case '=': setvar_mem(var, val, vm); break;
+            case '+': addvar_mem(var, val, vm); break;
+            case '-': subvar_mem(var, val, vm); break;
+            case '*': mulvar_mem(var, val, vm); break;
+            case '/': divvar_mem(var, val, vm); break;
+            case '%': remvar_mem(var, val, vm); break;
+            case '^': xorvar_mem(var, val, vm); break;
+            case '&': andvar_mem(var, val, vm); break;
+            case '|': orvar_mem(var, val, vm); break;
+            case '>': rightvar_mem(var, val, vm); break;
+            case '<': leftvar_mem(var, val, vm); break;
             case '?':
-                flag_equal = var_val == val;
-                flag_noteq = !flag_equal;
-                flag_bigger = var_val > val;
-                flag_less = var_val < val;
-                flag_eq_bigger = var_val >= val;
-                flag_eq_less = var_val <= val;
+                vm->fl_equal = var_val == val;
+                vm->fl_not_equal= !vm->fl_equal;
+                vm->fl_bigger = var_val > val;
+                vm->fl_less = var_val < val;
+                vm->fl_eq_bigger = var_val >= val;
+                vm->fl_eq_less = var_val <= val;
                 break;
         }
     } else if (node->type == NODE_ASSIGN_BYTE) {
         uint8_t var = node->value.assign_byte.var;
-        uint8_t var_val = getbyte_mem(node->value.assign_byte.var);
+        uint8_t var_val = getbyte_mem(node->value.assign_byte.var, vm);
         uint8_t val = node->value.assign_byte.val;
         switch (node->value.assign_byte.op) {
-            case '=': setbyte_mem(var, val); break;
-            case '+': addbyte_mem(var, val); break;
-            case '-': subbyte_mem(var, val); break;
-            case '*': mulbyte_mem(var, val); break;
-            case '/': divbyte_mem(var, val); break;
-            case '%': rembyte_mem(var, val); break;
-            case '^': xorbyte_mem(var, val); break;
-            case '&': andbyte_mem(var, val); break;
-            case '|': orbyte_mem(var, val); break;
-            case '>': rightbyte_mem(var, val); break;
-            case '<': leftbyte_mem(var, val); break;
+            case '=': setbyte_mem(var, val, vm); break;
+            case '+': addbyte_mem(var, val, vm); break;
+            case '-': subbyte_mem(var, val, vm); break;
+            case '*': mulbyte_mem(var, val, vm); break;
+            case '/': divbyte_mem(var, val, vm); break;
+            case '%': rembyte_mem(var, val, vm); break;
+            case '^': xorbyte_mem(var, val, vm); break;
+            case '&': andbyte_mem(var, val, vm); break;
+            case '|': orbyte_mem(var, val, vm); break;
+            case '>': rightbyte_mem(var, val, vm); break;
+            case '<': leftbyte_mem(var, val, vm); break;
             case '?':
-                flag_equal = var_val == val;
-                flag_noteq = !flag_equal;
-                flag_bigger = var_val > val;
-                flag_less = var_val < val;
-                flag_eq_bigger = var_val >= val;
-                flag_eq_less = var_val <= val;
+                vm->fl_equal = var_val == val;
+                vm->fl_not_equal = !vm->fl_equal;
+                vm->fl_bigger = var_val > val;
+                vm->fl_less = var_val < val;
+                vm->fl_eq_bigger = var_val >= val;
+                vm->fl_eq_less = var_val <= val;
                 break;
         }
     } else if (node->type == NODE_COMMAND) {
         char c;
         switch (node->value.command.cmd) {
             case 'w':
-                putchar(node->value.command.arg);
+                putuint32(node->value.command.arg);
                 break;
             case 'r':
                 c = inst_getchar();
-                setbyte_mem(node->value.command.arg, c);
+                setbyte_mem(node->value.command.arg, c, vm);
                 break;
             case 'j':
-                pc = get_label_addr(node->value.command.arg);
+                vm->pc = get_label_addr(node->value.command.arg, vm);
                 // printf("Jumping to %zu from l%zu\n", pc, node->value.command.arg);
                 break;
             default:
-                printf_error("Command is unsupported yet: '%c'", node->value.command.cmd);
+                printf_error_vm(vm, "Command is unsupported yet: '%c'", node->value.command.cmd);
         }
     } else if (node->type == NODE_LABEL) {
         // NOTHING
     } else if (node->type == NODE_CONDJMP) {
         char *op = node->value.condjmp.op;
-        char new_pc = get_label_addr(node->value.condjmp.label);
+        uint64_t new_pc = get_label_addr(node->value.condjmp.label, vm);
+
+        // print_flags(vm);
 
         if (!strcmp(op, "==")) {
-            if (flag_equal) pc = new_pc;
+            if (vm->fl_equal) vm->pc = new_pc;
         } else if (!strcmp(op, "!")) {
-            if (flag_noteq) pc = new_pc;
+            if (vm->fl_not_equal) vm->pc = new_pc;
         } else if (!strcmp(op, ">")) {
-            if (flag_bigger) pc = new_pc;
+            if (vm->fl_bigger) vm->pc = new_pc;
         } else if (!strcmp(op, "<")) {
-            if (flag_less) pc = new_pc;
+            if (vm->fl_less) vm->pc = new_pc;
         } else if (!strcmp(op, ">=")) {
-            if (flag_eq_bigger) pc = new_pc;
+            if (vm->fl_eq_bigger) vm->pc = new_pc;
         } else if (!strcmp(op, "<=")) {
-            if (flag_eq_less) pc = new_pc;
+            if (vm->fl_eq_less) vm->pc = new_pc;
         }
     }
 }
 
-void run_code(const char *code) {
-    if (!code) printf_error("Failed to get the code while running");
+void run_code(ShortVM *vm) {
+    if (!vm->code) printf_error_vm(vm, "Failed to get the code while running");
 
     Status status;
-    parse_labels(code, label_memory, &status);
-    // scanlabels(100);
+    parse_labels(vm, &status);
+    scanlabels(100, vm);
 
-    for (; code[pc] != '\0' ;) {
-        Node node = parse(code, &status);
+    for (; vm->code[vm->pc] != '\0' ;) {
+        Node node = parse(vm, &status);
         if (status != STATUS_SUCCESS) {
             if (status == STATUS_CONTINUE) continue;
-            printf_error("%s at '%c' (ASCII: %d, PC: %ld)", status_to_str(status), code[pc], code[pc], pc);
+            if (vm->code[vm->pc] == '\0') {
+                printf_error_vm(vm, "%s at the end of file (PC: %ld)", status_to_str(status), vm->pc);
+            } else {
+                printf_error_vm(vm, "%s at '%c' (ASCII: %d, PC: %ld)", status_to_str(status), vm->code[vm->pc], vm->code[vm->pc], vm->pc);
+            }
             return;
         }
         
-        run_node(&node);
+        run_node(&node, vm);
     }
 }

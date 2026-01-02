@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+#include "vm.h"
+
 typedef enum {
     STATUS_SUCCESS,
 
@@ -12,16 +14,20 @@ typedef enum {
     STATUS_EXPECTED_NUM,
     STATUS_EXPECTED_OP,
     STATUS_EXPECTED_VAL,
+    STATUS_EXPECTED_VAR,
     STATUS_EXPECTED_LIT_CONT,
     STATUS_EXPECTED_QUOTE,
     STATUS_EXPECTED_QUOTE_CLOSE,
     STATUS_EXPECTED_ENDLINE,
     STATUS_EXPECTED_LABEL,
     STATUS_EXPECTED_CLOSING_BRACKET,
+    STATUS_EXPECTED_COMMENT_END,
 
     STATUS_UNEXPECTED_SYMBOL,
 
     STATUS_UNKNOWN_LIT,
+
+    STATUS_INVALID_SYMBOL,
 
     STATUS_DIVISION_BY_ZERO
 } Status;
@@ -77,7 +83,7 @@ typedef struct {
     } value;
 } Node;
 
-void parse_labels(const char *code, uint64_t *label_memory, Status *status);
-Node parse(const char *code, Status *status);
+void parse_labels(ShortVM *vm, Status *status);
+Node parse(ShortVM *vm, Status *status);
 
 #endif

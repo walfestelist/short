@@ -5,43 +5,45 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "vm.h"
+
 #define BLOCK_SIZE 512
 
-void init_mem();
-uint8_t getbyte_mem(size_t n);
-void setbyte_mem(size_t n, uint8_t value);
-uint64_t getvar_mem(size_t n);
-void setvar_mem(size_t n, uint64_t value);
+void init_mem(ShortVM *vm);
+uint8_t getbyte_mem(size_t n, ShortVM *vm);
+void setbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+uint64_t getvar_mem(size_t n, ShortVM *vm);
+void setvar_mem(size_t n, uint64_t value, ShortVM *vm);
 
-uint64_t get_label_addr(uint64_t num);
-void set_label_addr(uint64_t num, uint64_t value);
+uint64_t get_label_addr(uint64_t num, ShortVM *vm);
+void set_label_addr(uint64_t num, uint64_t value, ShortVM *vm);
 
-void addbyte_mem(size_t n, uint8_t value);
-void subbyte_mem(size_t n, uint8_t value);
-void mulbyte_mem(size_t n, uint8_t value);
-void divbyte_mem(size_t n, uint8_t value);
-void rembyte_mem(size_t n, uint8_t value);
+void addbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void subbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void mulbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void divbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void rembyte_mem(size_t n, uint8_t value, ShortVM *vm);
 
-void addvar_mem(size_t n, uint64_t value);
-void subvar_mem(size_t n, uint64_t value);
-void mulvar_mem(size_t n, uint64_t value);
-void divvar_mem(size_t n, uint64_t value);
-void remvar_mem(size_t n, uint64_t value);
+void addvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void subvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void mulvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void divvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void remvar_mem(size_t n, uint64_t value, ShortVM *vm);
 
-void orbyte_mem(size_t n, uint8_t value);
-void xorbyte_mem(size_t n, uint8_t value);
-void andbyte_mem(size_t n, uint8_t value);
-void rightbyte_mem(size_t n, uint8_t value);
-void leftbyte_mem(size_t n, uint8_t value);
+void orbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void xorbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void andbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void rightbyte_mem(size_t n, uint8_t value, ShortVM *vm);
+void leftbyte_mem(size_t n, uint8_t value, ShortVM *vm);
 
-void orvar_mem(size_t n, uint64_t value);
-void xorvar_mem(size_t n, uint64_t value);
-void andvar_mem(size_t n, uint64_t value);
-void rightvar_mem(size_t n, uint64_t value);
-void leftvar_mem(size_t n, uint64_t value);
+void orvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void xorvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void andvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void rightvar_mem(size_t n, uint64_t value, ShortVM *vm);
+void leftvar_mem(size_t n, uint64_t value, ShortVM *vm);
 
-void scanbytes_mem(size_t n);
-void scanvars_mem(size_t n);
-void scanlabels(size_t n);
+void scanbytes_mem(size_t n, ShortVM *vm);
+void scanvars_mem(size_t n, ShortVM *vm);
+void scanlabels(size_t n, ShortVM *vm);
 
 #endif
